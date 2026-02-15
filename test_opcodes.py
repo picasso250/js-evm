@@ -78,6 +78,37 @@ TEST_CASES = {
     # 4 >> 1. Stack: [1, 4]. 压栈: PUSH 4, PUSH 1.
     "SHR": ("4 >> 1", "600460011c00"),  # PUSH 4, PUSH 1. 4 >> 1 -> 2
     "SAR": ("4 >> 1 (Arith)", "600460011d00"),
+    # --- Stack Operations (PUSH) ---
+    # PUSH0 (0x5F) - Shanghai Upgrade
+    "PUSH0": ("Push 0", "5f00"),  # Stack: [0]
+    # PUSH1: 已经测过了 (60)，测一下边界
+    "PUSH1_MAX": ("Push 255", "60ff00"),  # Stack: [255]
+    # PUSH8: 64位最大值. 67 + 8 bytes FF.
+    # 官方 EVM 和你的 EVM 都应该能处理 64 位整数
+    "PUSH8_MAX": (
+        "Max Uint64",
+        "67ffffffffffffffff00",
+    ),  # Stack: [18446744073709551615]
+    # --- Stack Operations (DUP) ---
+    # DUP1 (0x80): 复制栈顶. Stack [1] -> [1, 1]
+    "DUP1": ("Clone top", "60018000"),  # PUSH 1, DUP1. Stack: [1, 1]
+    # DUP2 (0x81): 复制第二个. Stack [1, 2] -> [2, 1, 2]
+    "DUP2": ("Clone 2nd", "600260018100"),
+    # DUP16 (0x8F): 极限测试. 需要先压入 16 个数
+    "DUP16": (
+        "Clone 16th",
+        "6010600f600e600d600c600b600a6009600860076006600560046003600260018f00",
+    ),
+    # --- Stack Operations (SWAP) ---
+    # SWAP1 (0x90): 交换 Top 和 Next.
+    "SWAP1": ("Swap top 2", "600160029000"),
+    # SWAP2 (0x91): 交换 Top 和 3rd.
+    "SWAP2": ("Swap 1st & 3rd", "6001600260039100"),
+    # SWAP16 (0x9F): 极限测试.
+    "SWAP16": (
+        "Swap 1st & 17th",
+        "60116010600f600e600d600c600b600a6009600860076006600560046003600260019f00",
+    ),
 }
 
 
