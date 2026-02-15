@@ -29,10 +29,10 @@ const vm = new EVM64(code, "10000000000");
 const result = vm.run(traceMode);
 
 if (traceMode) {
-    result.traces.forEach(t => console.log(JSON.stringify(t)));
+    result.traces.forEach(t => console.error(JSON.stringify(t)));
 }
 
-console.log(JSON.stringify({
+console.error(JSON.stringify({
     output: result.output,
     gasUsed: result.gasUsed
 }));
