@@ -1,5 +1,5 @@
 import { OPCODE_NAMES, createOpcodes } from '../common/opcodes.mjs';
-import { bytesToHex, hexToBytes } from '../common/utils.mjs';
+import { hexToBytes } from '../common/utils.mjs';
 
 export class Compiler {
     constructor() {
@@ -32,7 +32,7 @@ export class Compiler {
             }
         }
         
-        return bytesToHex(new Uint8Array(bytes));
+        return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
     disassemble(bytecode) {
