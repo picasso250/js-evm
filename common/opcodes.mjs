@@ -19,7 +19,7 @@ export const createOpcodes = (toU64) => ({
         const a = vm.stack.pop();
         const b = vm.stack.pop();
         if (a === 0n) vm.stack.push(0n);
-        else vm.stack.push(toU64(b / a));
+        else vm.stack.push(toU64(a / b));
     }},
     0x05: { name: 'SDIV', cost: 5, run: (vm) => {
         const a = BigInt.asIntN(64, vm.stack.pop());
@@ -35,7 +35,7 @@ export const createOpcodes = (toU64) => ({
         const a = vm.stack.pop();
         const b = vm.stack.pop();
         if (a === 0n) vm.stack.push(0n);
-        else vm.stack.push(toU64(b % a));
+        else vm.stack.push(toU64(a % b));
     }},
     0x07: { name: 'SMOD', cost: 5, run: (vm) => {
         const a = BigInt.asIntN(64, vm.stack.pop());
@@ -85,22 +85,22 @@ export const createOpcodes = (toU64) => ({
     0x10: { name: 'LT', cost: 3, run: (vm) => {
         const a = vm.stack.pop();
         const b = vm.stack.pop();
-        vm.stack.push(b < a ? 1n : 0n);
+        vm.stack.push(a < b ? 1n : 0n);
     }},
     0x11: { name: 'GT', cost: 3, run: (vm) => {
         const a = vm.stack.pop();
         const b = vm.stack.pop();
-        vm.stack.push(b > a ? 1n : 0n);
+        vm.stack.push(a > b ? 1n : 0n);
     }},
     0x12: { name: 'SLT', cost: 3, run: (vm) => {
         const a = BigInt.asIntN(64, vm.stack.pop());
         const b = BigInt.asIntN(64, vm.stack.pop());
-        vm.stack.push(b < a ? 1n : 0n);
+        vm.stack.push(a < b ? 1n : 0n);
     }},
     0x13: { name: 'SGT', cost: 3, run: (vm) => {
         const a = BigInt.asIntN(64, vm.stack.pop());
         const b = BigInt.asIntN(64, vm.stack.pop());
-        vm.stack.push(b > a ? 1n : 0n);
+        vm.stack.push(a > b ? 1n : 0n);
     }},
     0x14: { name: 'EQ', cost: 3, run: (vm) => {
         const a = vm.stack.pop();
