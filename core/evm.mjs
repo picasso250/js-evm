@@ -37,8 +37,8 @@ export class EVM64 {
     run(trace = false) {
         this.traces = [];
         
-        // 循环条件：Code 游标未结束 且 运行标志为真
-        while (this.running && !this.code.isFinished) {
+        // 只要 running 为 true 就一直跑
+        while (this.running) {
             
             // 1. 记录指令开始时的 PC (用于 Trace 和 PC 指令)
             this.pcAtStart = this.code.currentPc;
