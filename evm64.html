@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVM64 Web</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #eee; }
+        h1 { color: #00d9ff; }
+        .input-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="text"] { width: 400px; padding: 8px; font-family: monospace; background: #16213e; border: 1px solid #0f3460; color: #eee; }
+        button { padding: 8px 20px; background: #0f3460; color: #fff; border: none; cursor: pointer; font-family: monospace; }
+        button:hover { background: #00d9ff; color: #000; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 12px; }
+        th, td { border: 1px solid #0f3460; padding: 6px 8px; text-align: left; }
+        th { background: #16213e; color: #00d9ff; }
+        tr:nth-child(even) { background: #16213e; }
+        .stack-val { color: #ffd700; }
+        .result { margin-top: 20px; padding: 10px; background: #16213e; border: 1px solid #0f3460; }
+    </style>
+</head>
+<body>
+    <h1>EVM64 Web</h1>
+    
+    <div class="input-group">
+        <label>字节码 (hex):</label>
+        <input type="text" id="bytecode" value="6002600300" placeholder="例如: 6002600300">
+    </div>
+    
+    <div class="input-group">
+        <label>Gas 限制:</label>
+        <input type="text" id="gasLimit" value="10000000000">
+    </div>
+    
+    <button onclick="runEVM()">运行</button>
+    
+    <div class="result" id="result" style="display:none;">
+        <strong>输出:</strong> <span id="output"></span> | 
+        <strong>Gas Used:</strong> <span id="gasUsed"></span>
+    </div>
+    
+    <table id="traceTable">
+        <thead>
+            <tr>
+                <th>PC</th>
+                <th>Op</th>
+                <th>OpName</th>
+                <th>Gas</th>
+                <th>GasCost</th>
+                <th>MemSize</th>
+                <th>Stack</th>
+                <th>Depth</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script type="module">
+        import { EVM64 } from './evm64-core.mjs';
+
+        window.runEVM = function() {
+            const bytecode = document.getElementById('bytecode').value.trim();
+            const gasLimit = document.getElementById('gasLimit').value.trim() || "10000000000";
+            
+            if (!bytecode) {
+                alert("请输入字节码");
+                return;
+            }
+
+            const vm = new EVM64(bytecode, gasLimit);
+            const result = vm.run(true);
+
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('output').textContent = result.output;
+            document.getElementById('gasUsed').textContent = result.gasUsed;
+
+            const tbody = document.querySelector('#traceTable tbody');
+            tbody.innerHTML = '';
+
+            result.traces.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${t.pc}</td>
+                    <td>${t.op}</td>
+                    <td>${t.opName}</td>
+                    <td>${t.gas}</td>
+                    <td>${t.gasCost}</td>
+                    <td>${t.memSize}</td>
+                    <td class="stack-val">[${t.stack.join(', ')}]</td>
+                    <td>${t.depth}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+    </script>
+</body>
+</html>
