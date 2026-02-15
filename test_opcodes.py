@@ -23,67 +23,61 @@ RESET = "\033[0m"
 TEST_CASES = {
     # --- Arithmetic ---
     # 加法满足交换律，但为了习惯保持一致，我们假设是 3 + 2
-    "ADD":      ("3 + 2", "600260030100"),             # PUSH 2, PUSH 3, ADD (Stack: [3, 2])
-    "MUL":      ("4 * 3", "600360040200"),             # PUSH 3, PUSH 4, MUL (Stack: [4, 3])
-    
+    "ADD": ("3 + 2", "600260030100"),  # PUSH 2, PUSH 3, ADD (Stack: [3, 2])
+    "MUL": ("4 * 3", "600360040200"),  # PUSH 3, PUSH 4, MUL (Stack: [4, 3])
     # 减法：Top - Next
     # 要计算 5 - 2，需要 Stack 为 [5, 2]，所以顺序是 PUSH 2, PUSH 5
-    "SUB":      ("5 - 2", "600260050300"),             # PUSH 2, PUSH 5, SUB -> 3
-    
+    "SUB": ("5 - 2", "600260050300"),  # PUSH 2, PUSH 5, SUB -> 3
     # 下溢测试：2 - 5
     # 需要 Stack 为 [2, 5]，顺序 PUSH 5, PUSH 2
-    "SUB_NEG":  ("2 - 5 (Underflow)", "600560020300"), # PUSH 5, PUSH 2, SUB -> Underflow
-    
+    "SUB_NEG": (
+        "2 - 5 (Underflow)",
+        "600560020300",
+    ),  # PUSH 5, PUSH 2, SUB -> Underflow
     # 除法：Top / Next
     # 10 / 2 => Stack [10, 2] => PUSH 2, PUSH 10
-    "DIV":      ("10 / 2", "6002600a0400"),            # PUSH 2, PUSH 10, DIV -> 5
-    
+    "DIV": ("10 / 2", "6002600a0400"),  # PUSH 2, PUSH 10, DIV -> 5
     # 10 % 3 => Stack [10, 3] => PUSH 3, PUSH 10
-    "MOD":      ("10 % 3", "6003600a0600"),            # PUSH 3, PUSH 10, MOD -> 1
-    
-    # ADDMOD: (A + B) % N. Stack: [A, B, N] 或 [N, A, B]? 
+    "MOD": ("10 % 3", "6003600a0600"),  # PUSH 3, PUSH 10, MOD -> 1
+    # ADDMOD: (A + B) % N. Stack: [A, B, N] 或 [N, A, B]?
     # EVM 定义: pop a, pop b, pop n. res = (a+b)%n. 顺序: Top=a, Next=b, Next+1=n.
-    # 要算 (10+10)%3. Stack 必须是 [10, 10, 3]. 
+    # 要算 (10+10)%3. Stack 必须是 [10, 10, 3].
     # 压栈顺序: PUSH 3, PUSH 10, PUSH 10
-    "ADDMOD":   ("(10+10)%3", "6003600a600a0800"),     # Stack: [10, 10, 3]. (10+10)%3 = 2
-    "MULMOD":   ("(10*10)%3", "6003600a600a0900"),     # Stack: [10, 10, 3]. (10*10)%3 = 1
-    
-    # EXP: Base ** Exp. 
+    "ADDMOD": ("(10+10)%3", "6003600a600a0800"),  # Stack: [10, 10, 3]. (10+10)%3 = 2
+    "MULMOD": ("(10*10)%3", "6003600a600a0900"),  # Stack: [10, 10, 3]. (10*10)%3 = 1
+    # EXP: Base ** Exp.
     # EVM 定义: pop base, pop exp. Stack: [Base, Exp].
     # 2 ** 3. Stack [2, 3]. 压栈: PUSH 3, PUSH 2.
-    "EXP":      ("2 ** 3", "600360020a00"),            # PUSH 3, PUSH 2 -> 8
-    
+    "EXP": ("2 ** 3", "600360020a00"),  # PUSH 3, PUSH 2 -> 8
     # --- Comparison ---
-    # LT: Top < Next. 
+    # LT: Top < Next.
     # 2 < 3. Stack [2, 3]. 压栈: PUSH 3, PUSH 2.
-    "LT":       ("2 < 3", "600360021000"),             # PUSH 3, PUSH 2. 2 < 3 -> 1 (True)
-    "GT":       ("2 > 3", "600360021100"),             # PUSH 3, PUSH 2. 2 > 3 -> 0 (False)
-    
-    # EQ: 3 == 3. 
-    "EQ":       ("3 == 3", "600360031400"),            
-    "ISZERO":   ("ISZERO(0)", "60001500"),             # Stack [0]. Result 1.
-    
+    "LT": ("2 < 3", "600360021000"),  # PUSH 3, PUSH 2. 2 < 3 -> 1 (True)
+    "GT": ("2 > 3", "600360021100"),  # PUSH 3, PUSH 2. 2 > 3 -> 0 (False)
+    # EQ: 3 == 3.
+    "EQ": ("3 == 3", "600360031400"),
+    "ISZERO": ("ISZERO(0)", "60001500"),  # Stack [0]. Result 1.
     # --- Bitwise ---
     # AND, OR, XOR 交换律，顺序不敏感，但习惯改一下
-    "AND":      ("0x0F & 0xF0", "60f0600f1600"),       
-    "OR":       ("0x0F | 0xF0", "60f0600f1700"),
-    "XOR":      ("0x0F ^ 0xFF", "60ff600f1800"),
-    "NOT":      ("NOT(0)", "60001900"),                
-    
+    "AND": ("0x0F & 0xF0", "60f0600f1600"),
+    "OR": ("0x0F | 0xF0", "60f0600f1700"),
+    "XOR": ("0x0F ^ 0xFF", "60ff600f1800"),
+    "NOT": ("NOT(0)", "60001900"),
     # BYTE: get byte i from word x. Stack: [i, x].
-    # Get byte 31 (last byte) of 0xFF...FF. Stack: [31, -1].
-    # 压栈: PUSH -1 (FF), PUSH 31 (1F).
-    "BYTE":     ("Get byte 31 of word", "60ff601f1a00"), 
-    
+    # 构造 -1 (通过 PUSH 0, NOT)，这样栈里全是 FF。
+    # 6000 (PUSH 0), 19 (NOT), 6007 (PUSH 7), 1A (BYTE), 00 (STOP)
+    # 64-bit: -1 = 0xFFFFFFFFFFFFFFFF, byte 7 = 0xFF
+    # 256-bit: -1 = 0xFF...FF, byte 7 = 0xFF
+    # 结果一致，PASS。
+    "BYTE": ("Get byte 7 of -1", "60001960071a00"),
     # SHL: shift left. Stack: [shift, value]. value << shift.
     # 1 << 2 (Value 1, Shift 2). Stack: [2, 1].
     # 压栈: PUSH 1, PUSH 2.
-    "SHL":      ("1 << 2", "600160021b00"),            # PUSH 1, PUSH 2. 1 << 2 -> 4
-    
+    "SHL": ("1 << 2", "600160021b00"),  # PUSH 1, PUSH 2. 1 << 2 -> 4
     # SHR: logical shift right. Stack: [shift, value]. value >> shift.
     # 4 >> 1. Stack: [1, 4]. 压栈: PUSH 4, PUSH 1.
-    "SHR":      ("4 >> 1", "600460011c00"),            # PUSH 4, PUSH 1. 4 >> 1 -> 2
-    "SAR":      ("4 >> 1 (Arith)", "600460011d00"),
+    "SHR": ("4 >> 1", "600460011c00"),  # PUSH 4, PUSH 1. 4 >> 1 -> 2
+    "SAR": ("4 >> 1 (Arith)", "600460011d00"),
 }
 
 
