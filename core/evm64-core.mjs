@@ -3,7 +3,11 @@ import { createOpcodes } from '../common/opcodes.mjs';
 
 export class EVM64 {
     constructor(codeHex, gasLimit) {
-        this.code = parseCode(codeHex);
+        let code = parseCode(codeHex);
+        if (code.length === 0 || code[code.length - 1] !== 0x00) {
+            code = [...code, 0x00];
+        }
+        this.code = code;
         this.pc = 0;
         this.stack = [];
         this.memory = [];

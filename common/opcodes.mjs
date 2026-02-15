@@ -82,6 +82,81 @@ export const createOpcodes = (toU64) => ({
             }
         }
     }},
+    0x10: { name: 'LT', cost: 3, run: (vm) => {
+        const a = vm.stack.pop();
+        const b = vm.stack.pop();
+        vm.stack.push(b < a ? 1n : 0n);
+    }},
+    0x11: { name: 'GT', cost: 3, run: (vm) => {
+        const a = vm.stack.pop();
+        const b = vm.stack.pop();
+        vm.stack.push(b > a ? 1n : 0n);
+    }},
+    0x12: { name: 'SLT', cost: 3, run: (vm) => {
+        const a = BigInt.asIntN(64, vm.stack.pop());
+        const b = BigInt.asIntN(64, vm.stack.pop());
+        vm.stack.push(b < a ? 1n : 0n);
+    }},
+    0x13: { name: 'SGT', cost: 3, run: (vm) => {
+        const a = BigInt.asIntN(64, vm.stack.pop());
+        const b = BigInt.asIntN(64, vm.stack.pop());
+        vm.stack.push(b > a ? 1n : 0n);
+    }},
+    0x14: { name: 'EQ', cost: 3, run: (vm) => {
+        const a = vm.stack.pop();
+        const b = vm.stack.pop();
+        vm.stack.push(a === b ? 1n : 0n);
+    }},
+    0x15: { name: 'ISZERO', cost: 3, run: (vm) => {
+        const a = vm.stack.pop();
+        vm.stack.push(a === 0n ? 1n : 0n);
+    }},
+    0x16: { name: 'AND', cost: 3, run: (vm) => {
+        const a = vm.stack.pop();
+        const b = vm.stack.pop();
+        vm.stack.push(toU64(a & b));
+    }},
+    0x17: { name: 'OR', cost: 3, run: (vm) => {
+        const a = vm.stack.pop();
+        const b = vm.stack.pop();
+        vm.stack.push(toU64(a | b));
+    }},
+    0x18: { name: 'XOR', cost: 3, run: (vm) => {
+        const a = vm.stack.pop();
+        const b = vm.stack.pop();
+        vm.stack.push(toU64(a ^ b));
+    }},
+    0x19: { name: 'NOT', cost: 3, run: (vm) => {
+        const a = vm.stack.pop();
+        vm.stack.push(toU64(~a));
+    }},
+    0x1A: { name: 'BYTE', cost: 3, run: (vm) => {
+        const i = vm.stack.pop();
+        const x = vm.stack.pop();
+        if (i >= 8n) {
+            vm.stack.push(0n);
+        } else {
+            const byteIndex = 7 - Number(i);
+            const byte = (x >> (byteIndex * 8n)) & 0xFFn;
+            vm.stack.push(byte);
+        }
+    }},
+    0x1B: { name: 'SHL', cost: 3, run: (vm) => {
+        const shift = vm.stack.pop();
+        const x = vm.stack.pop();
+        vm.stack.push(toU64(x << shift));
+    }},
+    0x1C: { name: 'SHR', cost: 3, run: (vm) => {
+        const shift = vm.stack.pop();
+        const x = vm.stack.pop();
+        vm.stack.push(toU64(x >> shift));
+    }},
+    0x1D: { name: 'SAR', cost: 3, run: (vm) => {
+        const shift = vm.stack.pop();
+        const x = BigInt.asIntN(64, vm.stack.pop());
+        const result = x >> shift;
+        vm.stack.push(toU64(result));
+    }},
     0x60: { name: 'PUSH1', cost: 3, run: (vm) => {
         if (vm.pc + 1 >= vm.code.length) throw new Error("PUSH1 out of bounds");
         const val = BigInt(vm.code[vm.pc + 1]);
@@ -103,5 +178,19 @@ export const OPCODE_NAMES = {
     'MULMOD': 0x09,
     'EXP': 0x0A,
     'SIGNEXTEND': 0x0B,
+    'LT': 0x10,
+    'GT': 0x11,
+    'SLT': 0x12,
+    'SGT': 0x13,
+    'EQ': 0x14,
+    'ISZERO': 0x15,
+    'AND': 0x16,
+    'OR': 0x17,
+    'XOR': 0x18,
+    'NOT': 0x19,
+    'BYTE': 0x1A,
+    'SHL': 0x1B,
+    'SHR': 0x1C,
+    'SAR': 0x1D,
     'PUSH1': 0x60,
 };
