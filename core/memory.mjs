@@ -68,6 +68,17 @@ export class Memory {
         }
     }
 
+    slice(offset, length) {
+        if (length <= 0) return new Uint8Array(0);
+        const end = offset + length;
+        if (end > this.buffer.length) {
+            const padded = new Uint8Array(length);
+            padded.set(this.buffer.slice(offset));
+            return padded;
+        }
+        return this.buffer.slice(offset, end);
+    }
+
     size() {
         return this.buffer.length;
     }

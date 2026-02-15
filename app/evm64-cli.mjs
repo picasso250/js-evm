@@ -33,6 +33,7 @@ if (traceMode) {
 }
 
 console.error(JSON.stringify({
-    output: result.output,
-    gasUsed: result.gasUsed
+    output: result.output.length > 0 ? Array.from(result.output).map(b => b.toString(16).padStart(2, '0')).join('') : '',
+    gasUsed: result.gasUsed,
+    error: result.reverted ? 'execution reverted' : undefined
 }));

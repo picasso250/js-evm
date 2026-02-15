@@ -16,6 +16,8 @@ export class EVM64 {
         // 3. 状态
         this.pcAtStart = 0; // 用于 PC 指令
         this.running = true;
+        this.reverted = false;
+        this.output = new Uint8Array(0);
         this.gas = BigInt(gasLimit);
         this.initialGas = BigInt(gasLimit);
         this.traces = [];
@@ -79,7 +81,9 @@ export class EVM64 {
         }
         
         return {
-            output: "", // 如果实现 RETURN，这里会有值
+            output: this.output,
+            outputHex: Array.from(this.output).map(b => b.toString(16).padStart(2, '0')).join(''),
+            reverted: this.reverted,
             gasUsed: toHex(this.initialGas - this.gas),
             traces: this.traces
         };

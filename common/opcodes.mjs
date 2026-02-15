@@ -34,7 +34,8 @@ export const OPCODE_NAMES = {
     SWAP6: 0x95, SWAP7: 0x96, SWAP8: 0x97, SWAP9: 0x98, SWAP10: 0x99,
     SWAP11: 0x9A, SWAP12: 0x9B, SWAP13: 0x9C, SWAP14: 0x9D, SWAP15: 0x9E, SWAP16: 0x9F,
     MLOAD: 0x51, MSTORE: 0x52, MSTORE8: 0x53, MSIZE: 0x59, MCOPY: 0x5E,
-    POP: 0x50
+    POP: 0x50,
+    RETURN: 0xF3, REVERT: 0xFD
 };
 
 export const createOpcodes = () => {
@@ -193,6 +194,22 @@ export const createOpcodes = () => {
                 vm.gas -= totalDynamicGas;
                 vm.memory.copy(dest, src, len);
             }
+        }},
+
+        // --- 终止 & 返回 ---
+        0xF3: { name: 'RETURN', cost: 0, run: (vm) => {
+            const offset = Number(vm.stack.pop());
+            const length = Number(vm.stack.pop());
+            vm.output = vm.memory.slice(offset, length);
+            vm.running = false;
+        }},
+        
+        0xFD: { name: 'REVERT', cost: 0, run: (vm) => {
+            const offset = Number(vm.stack.pop());
+            const length = Number(vm.stack.pop());
+            vm.output = vm.memory.slice(offset, length);
+            vm.reverted = true;
+            vm.running = false;
         }},
     };
 
