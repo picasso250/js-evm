@@ -27,7 +27,8 @@ export const OPCODE_NAMES = {
     SWAP1: 0x90, SWAP2: 0x91, SWAP3: 0x92, SWAP4: 0x93, SWAP5: 0x94,
     SWAP6: 0x95, SWAP7: 0x96, SWAP8: 0x97, SWAP9: 0x98, SWAP10: 0x99,
     SWAP11: 0x9A, SWAP12: 0x9B, SWAP13: 0x9C, SWAP14: 0x9D, SWAP15: 0x9E, SWAP16: 0x9F,
-    MLOAD: 0x51, MSTORE: 0x52
+    MLOAD: 0x51, MSTORE: 0x52, MSTORE8: 0x53, MSIZE: 0x59, MCOPY: 0x5E,
+    POP: 0x50
 };
 
 export const createOpcodes = () => {
@@ -137,6 +138,8 @@ export const createOpcodes = () => {
         }},
 
         // --- 内存 ---
+        0x50: { name: 'POP', cost: 2, run: (vm) => vm.stack.pop() },
+        
         0x51: { name: 'MLOAD', cost: 3, run: (vm) => {
             const offset = Number(vm.stack.pop());
             vm.stack.push(vm.memory.load(offset));
@@ -145,6 +148,20 @@ export const createOpcodes = () => {
             const offset = Number(vm.stack.pop());
             const val = vm.stack.pop();
             vm.memory.store(offset, val);
+        }},
+        0x53: { name: 'MSTORE8', cost: 3, run: (vm) => {
+            const offset = Number(vm.stack.pop());
+            const val = vm.stack.pop();
+            vm.memory.store8(offset, val);
+        }},
+        0x59: { name: 'MSIZE', cost: 2, run: (vm) => {
+            vm.stack.push(BigInt(vm.memory.size()));
+        }},
+        0x5E: { name: 'MCOPY', cost: 3, run: (vm) => {
+            const dest = Number(vm.stack.pop());
+            const src = Number(vm.stack.pop());
+            const len = Number(vm.stack.pop());
+            vm.memory.copy(dest, src, len);
         }},
     };
 

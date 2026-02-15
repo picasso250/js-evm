@@ -109,6 +109,17 @@ TEST_CASES = {
         "Swap 1st & 17th",
         "60116010600f600e600d600c600b600a6009600860076006600560046003600260019f00",
     ),
+    # --- Memory Operations ---
+    # POP: PUSH 1, PUSH 2, POP. Stack should be [1]
+    "POP": ("Pop top", "600160025000"),
+    # MSTORE/MLOAD Roundtrip
+    "MEM_IO": ("Store & Load", "64deadbeef60005260005100"),
+    # MSTORE8
+    "MSTORE8": ("Store Byte", "60ff60005360005100"),
+    # MSIZE
+    "MSIZE": ("Check Mem Size", "60016000525900"),
+    # MCOPY (Cancun)
+    "MCOPY": ("Memory Copy", "61aabb6000526002600060025e60005100"),
 }
 
 

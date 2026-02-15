@@ -47,6 +47,14 @@ export class Memory {
         this.buffer[offset] = Number(value & 0xffn);
     }
 
+    copy(dest, src, length) {
+        if (length <= 0) return;
+        const maxOffset = Math.max(dest + length, src + length);
+        this.extend(0, maxOffset);
+        const chunk = this.buffer.slice(src, src + length);
+        this.buffer.set(chunk, dest);
+    }
+
     size() {
         return this.buffer.length;
     }
