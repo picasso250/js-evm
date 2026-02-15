@@ -36,7 +36,7 @@ STOP</textarea>
     <button onclick="compile()">编译</button>
     <button onclick="run()">编译并运行</button>
     
-    <div class="output-box" id="compiledOutput" style="display:none;"></div>
+
     
     <div class="input-group">
         <label>字节码 (hex):</label>
@@ -53,7 +53,8 @@ STOP</textarea>
     
     <div class="result" id="result" style="display:none;">
         <strong>输出:</strong> <span id="output"></span> | 
-        <strong>Gas Used:</strong> <span id="gasUsed"></span>
+        <strong>Gas Used:</strong> <span id="gasUsed"></span> |
+        <strong>Error:</strong> <span id="error"></span>
     </div>
     
     <table id="traceTable">
@@ -82,11 +83,8 @@ STOP</textarea>
             try {
                 const bytecode = compiler.compile(source);
                 document.getElementById('bytecode').value = bytecode;
-                document.getElementById('compiledOutput').style.display = 'block';
-                document.getElementById('compiledOutput').textContent = '编译结果: ' + bytecode;
             } catch (e) {
-                document.getElementById('compiledOutput').style.display = 'block';
-                document.getElementById('compiledOutput').textContent = '错误: ' + e.message;
+                alert('编译错误: ' + e.message);
             }
         };
 
@@ -108,8 +106,10 @@ STOP</textarea>
             const result = vm.run(true);
 
             document.getElementById('result').style.display = 'block';
-            document.getElementById('output').textContent = result.output;
+            const outputStr = result.output.length > 0 ? Array.from(result.output).map(b => b.toString(16).padStart(2, '0')).join('') : '';
+            document.getElementById('output').textContent = outputStr;
             document.getElementById('gasUsed').textContent = result.gasUsed;
+            document.getElementById('error').textContent = result.reverted ? 'execution reverted' : '';
 
             const tbody = document.querySelector('#traceTable tbody');
             tbody.innerHTML = '';
