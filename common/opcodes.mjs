@@ -1,4 +1,10 @@
-import { toU64, toS64 } from '../common/utils.mjs';
+import { toU64, toS64, calcCopyCost } from '../common/utils.mjs';
+
+const getByteLength = (val) => {
+    if (val === 0n) return 0;
+    let hex = val.toString(16);
+    return Math.ceil(hex.length / 2);
+};
 
 const createBinOp = (vm, logicFn) => {
     const top = vm.stack.pop();
@@ -42,7 +48,15 @@ export const createOpcodes = () => {
         0x04: { name: 'DIV', cost: 5, run: (vm) => createBinOp(vm, (top, next) => next === 0n ? 0n : top / next) },
         0x05: { name: 'SDIV', cost: 5, run: (vm) => createSignedBinOp(vm, (top, next) => next === 0n ? 0n : top / next) },
         
-        0x0A: { name: 'EXP', cost: 10, run: (vm) => createBinOp(vm, (base, exponent) => base ** exponent) },
+        0x0A: { name: 'EXP', cost: 10, run: (vm) => {
+            const base = vm.stack.pop();
+            const exponent = vm.stack.pop();
+            const byteLen = getByteLength(exponent);
+            const expGas = 50n * BigInt(byteLen);
+            if (vm.gas < expGas) throw new Error("Out of Gas: EXP");
+            vm.gas -= expGas;
+            vm.stack.push(toU64(base ** exponent));
+        }},
         
         0x06: { name: 'MOD', cost: 5, run: (vm) => createBinOp(vm, (top, next) => next === 0n ? 0n : top % next) },
         0x07: { name: 'SMOD', cost: 5, run: (vm) => createSignedBinOp(vm, (top, next) => next === 0n ? 0n : top % next) },
@@ -142,26 +156,43 @@ export const createOpcodes = () => {
         
         0x51: { name: 'MLOAD', cost: 3, run: (vm) => {
             const offset = Number(vm.stack.pop());
+            const expansionCost = vm.memory.expand(offset, 8);
+            if (vm.gas < expansionCost) throw new Error("Out of Gas: Memory Expansion");
+            vm.gas -= expansionCost;
             vm.stack.push(vm.memory.load(offset));
         }},
         0x52: { name: 'MSTORE', cost: 3, run: (vm) => {
             const offset = Number(vm.stack.pop());
             const val = vm.stack.pop();
+            const expansionCost = vm.memory.expand(offset, 8);
+            if (vm.gas < expansionCost) throw new Error("Out of Gas: Memory Expansion");
+            vm.gas -= expansionCost;
             vm.memory.store(offset, val);
         }},
         0x53: { name: 'MSTORE8', cost: 3, run: (vm) => {
             const offset = Number(vm.stack.pop());
             const val = vm.stack.pop();
+            const expansionCost = vm.memory.expand(offset, 1);
+            if (vm.gas < expansionCost) throw new Error("Out of Gas: Memory Expansion");
+            vm.gas -= expansionCost;
             vm.memory.store8(offset, val);
         }},
         0x59: { name: 'MSIZE', cost: 2, run: (vm) => {
-            vm.stack.push(BigInt(vm.memory.size()));
+            vm.stack.push(vm.memory.activeWords * 32n);
         }},
         0x5E: { name: 'MCOPY', cost: 3, run: (vm) => {
             const dest = Number(vm.stack.pop());
             const src = Number(vm.stack.pop());
             const len = Number(vm.stack.pop());
-            vm.memory.copy(dest, src, len);
+            if (len > 0) {
+                const exp1 = vm.memory.expand(src, len);
+                const exp2 = vm.memory.expand(dest, len);
+                const copyGas = calcCopyCost(len);
+                const totalDynamicGas = exp1 + exp2 + copyGas;
+                if (vm.gas < totalDynamicGas) throw new Error("Out of Gas: MCOPY");
+                vm.gas -= totalDynamicGas;
+                vm.memory.copy(dest, src, len);
+            }
         }},
     };
 

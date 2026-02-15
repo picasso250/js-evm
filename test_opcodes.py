@@ -132,14 +132,11 @@ def clean_hex(hex_str):
 
 
 def run_evm(cmd_prefix, bytecode):
-    """运行 EVM 命令并提取最终 Stack"""
+    """运行 EVM 命令并提取最终 Stack 和 Gas Used"""
     full_cmd = cmd_prefix + [bytecode]
 
     try:
-        # 你的 cli 可能在 windows 上需要 shell=True，或者不需要，视环境而定
-        # 这里为了兼容 list 形式传参，shell=True 在 windows 上有时需要把 cmd 拼成 string
         if os.name == "nt":
-            # Windows workaround
             result = subprocess.run(
                 " ".join(full_cmd), capture_output=True, text=True, shell=True
             )
@@ -147,32 +144,26 @@ def run_evm(cmd_prefix, bytecode):
             result = subprocess.run(full_cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
-            return None, f"Error: {result.stderr}"
+            return None, None, f"Error: {result.stderr}"
 
         lines = result.stderr.strip().split("\n")
         last_stack = []
+        gas_used = None
 
-        # 解析 JSON 输出，寻找最后一条指令的 Stack 状态
-        # Trace 通常是指令执行 *前* 的状态。
-        # 我们寻找 'opName': 'STOP' 的那一行，它的 'stack' 字段即为最终结果。
-        # 如果没有 STOP，取最后一行含 stack 的。
-
-        found_stop = False
         for line in lines:
             try:
                 data = json.loads(line)
                 if "stack" in data:
                     last_stack = data["stack"]
-                    if data.get("opName") == "STOP":
-                        found_stop = True
-                        break  # 找到 STOP 就结束
+                if "gasUsed" in data:
+                    gas_used = data["gasUsed"]
             except json.JSONDecodeError:
                 continue
 
-        return last_stack, None
+        return last_stack, gas_used, None
 
     except Exception as e:
-        return None, str(e)
+        return None, None, str(e)
 
 
 def compare_stacks(stack_my, stack_ref):
@@ -187,33 +178,46 @@ def compare_stacks(stack_my, stack_ref):
 
 
 def main():
-    print(f"{'OPCODE':<10} | {'RESULT':<8} | {'DETAILS'}")
-    print("-" * 60)
+    print(f"{'OPCODE':<10} | {'RESULT':<8} | {'GAS':<8} | {'DETAILS'}")
+    print("-" * 75)
 
     for op_name, (desc, bytecode) in TEST_CASES.items():
         # 1. 运行我的 EVM
-        my_stack, my_err = run_evm(MY_EVM_CMD, bytecode)
+        my_stack, my_gas, my_err = run_evm(MY_EVM_CMD, bytecode)
 
         # 2. 运行官方 EVM
-        ref_stack, ref_err = run_evm(OFFICIAL_EVM_CMD, bytecode)
+        ref_stack, ref_gas, ref_err = run_evm(OFFICIAL_EVM_CMD, bytecode)
 
         if my_err:
-            print(f"{op_name:<10} | {RED}ERR(MY){RESET} | {my_err}")
+            print(f"{op_name:<10} | {RED}ERR(MY){RESET} | -        | {my_err}")
             continue
         if ref_err:
-            print(f"{op_name:<10} | {RED}ERR(REF){RESET} | {ref_err}")
+            print(f"{op_name:<10} | {RED}ERR(REF){RESET} | -        | {ref_err}")
             continue
 
-        # 3. 比较
-        is_match = compare_stacks(my_stack, ref_stack)
+        # 3. 比较 Stack
+        stack_match = compare_stacks(my_stack, ref_stack)
 
-        if is_match:
-            print(f"{op_name:<10} | {GREEN}PASS{RESET}     | {desc}")
-        else:
-            print(f"{op_name:<10} | {YELLOW}DIFF{RESET}     | {desc}")
+        # 4. 比较 Gas
+        gas_match = clean_hex(my_gas) == clean_hex(ref_gas)
+
+        # 5. 输出判定
+        if stack_match and gas_match:
+            print(
+                f"{op_name:<10} | {GREEN}PASS{RESET}     | {GREEN}MATCH{RESET}    | {desc}"
+            )
+        elif not stack_match:
+            print(
+                f"{op_name:<10} | {YELLOW}DIFF{RESET}     | {('MATCH' if gas_match else 'DIFF')}    | {desc}"
+            )
             print(f"  {YELLOW}My Stack :{RESET} {my_stack}")
             print(f"  {YELLOW}Ref Stack:{RESET} {ref_stack}")
-            print("")
+        else:
+            print(
+                f"{op_name:<10} | {GREEN}PASS{RESET}     | {RED}GAS DIFF{RESET} | {desc}"
+            )
+            print(f"  {RED}My Gas :{RESET} {my_gas} ({int(clean_hex(my_gas), 16)})")
+            print(f"  {RED}Ref Gas:{RESET} {ref_gas} ({int(clean_hex(ref_gas), 16)})")
 
 
 if __name__ == "__main__":

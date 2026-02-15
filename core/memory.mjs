@@ -1,40 +1,50 @@
-import { toHex } from '../common/utils.mjs';
+import { toHex, calcMemoryCost } from '../common/utils.mjs';
 
 export class Memory {
     constructor() {
         this.buffer = new Uint8Array(0);
+        this.activeWords = 0n;
     }
 
-    /**
-     * 确保内存空间足够，不足则扩容 (以 32 字节为单位对齐)
-     */
-    extend(offset, size) {
-        if (size === 0) return;
-        const newSize = offset + size;
+    expand(offset, size) {
+        if (size === 0) return 0n;
+        
+        const end = offset + size;
+        const newWords = BigInt(Math.ceil(end / 32));
+
+        if (newWords <= this.activeWords) {
+            return 0n;
+        }
+
+        const newCost = calcMemoryCost(newWords);
+        const currentCost = calcMemoryCost(this.activeWords);
+        const cost = newCost - currentCost;
+
+        this.activeWords = newWords;
+        this._resizeBuffer(Number(newWords * 32n));
+
+        return cost;
+    }
+
+    _resizeBuffer(newSize) {
         if (newSize > this.buffer.length) {
-            const alignedSize = Math.ceil(newSize / 32) * 32;
-            const newBuffer = new Uint8Array(alignedSize);
+            const newBuffer = new Uint8Array(newSize);
             newBuffer.set(this.buffer);
             this.buffer = newBuffer;
         }
     }
 
-    /**
-     * MSTORE: 存入 64位 (8字节) Word
-     */
     store(offset, value) {
-        this.extend(offset, 8);
         for (let i = 0; i < 8; i++) {
             const byte = Number((value >> BigInt((7 - i) * 8)) & 0xffn);
             this.buffer[offset + i] = byte;
         }
     }
 
-    /**
-     * MLOAD: 读取 64位 (8字节) Word
-     */
     load(offset) {
-        this.extend(offset, 8);
+        if (offset + 8 > this.buffer.length) {
+            return 0n;
+        }
         let value = 0n;
         for (let i = 0; i < 8; i++) {
             value = (value << 8n) | BigInt(this.buffer[offset + i]);
@@ -43,16 +53,19 @@ export class Memory {
     }
     
     store8(offset, value) {
-        this.extend(offset, 1);
         this.buffer[offset] = Number(value & 0xffn);
     }
 
     copy(dest, src, length) {
         if (length <= 0) return;
-        const maxOffset = Math.max(dest + length, src + length);
-        this.extend(0, maxOffset);
         const chunk = this.buffer.slice(src, src + length);
-        this.buffer.set(chunk, dest);
+        if (chunk.length < length) {
+            const padded = new Uint8Array(length);
+            padded.set(chunk);
+            this.buffer.set(padded, dest);
+        } else {
+            this.buffer.set(chunk, dest);
+        }
     }
 
     size() {
