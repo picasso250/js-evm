@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { EVM64 } from '../core/evm64-core.mjs';
+import { EVM64 } from '../core/evm.mjs';
 
 const args = process.argv.slice(2);
 
