@@ -1,46 +1,5 @@
-export const toHex = (bigIntVal) => '0x' + bigIntVal.toString(16);
-
-export const toU64 = (bigIntVal) => BigInt.asUintN(64, bigIntVal);
-
-export const parseCode = (hexString) => {
-    if (hexString.startsWith('0x')) hexString = hexString.slice(2);
-    const bytes = new Uint8Array(hexString.length / 2);
-    for (let i = 0; i < hexString.length; i += 2) {
-        bytes[i / 2] = parseInt(hexString.substr(i, 2), 16);
-    }
-    return bytes;
-};
-
-export const OPCODES = {
-    0x00: { name: 'STOP', cost: 0, run: (vm) => { vm.running = false; } },
-    0x01: { name: 'ADD', cost: 3, run: (vm) => {
-        const a = vm.stack.pop();
-        const b = vm.stack.pop();
-        vm.stack.push(toU64(a + b));
-    }},
-    0x02: { name: 'MUL', cost: 5, run: (vm) => {
-        const a = vm.stack.pop();
-        const b = vm.stack.pop();
-        vm.stack.push(toU64(a * b));
-    }},
-    0x03: { name: 'SUB', cost: 3, run: (vm) => {
-        const a = vm.stack.pop();
-        const b = vm.stack.pop();
-        vm.stack.push(toU64(a - b));
-    }},
-    0x04: { name: 'DIV', cost: 5, run: (vm) => {
-        const a = vm.stack.pop();
-        const b = vm.stack.pop();
-        if (b === 0n) vm.stack.push(0n);
-        else vm.stack.push(toU64(a / b));
-    }},
-    0x60: { name: 'PUSH1', cost: 3, run: (vm) => {
-        if (vm.pc + 1 >= vm.code.length) throw new Error("PUSH1 out of bounds");
-        const val = BigInt(vm.code[vm.pc + 1]);
-        vm.stack.push(val);
-        vm.pc += 1;
-    }},
-};
+import { toHex, parseCode } from '../common/utils.mjs';
+import { createOpcodes } from '../common/opcodes.mjs';
 
 export class EVM64 {
     constructor(codeHex, gasLimit) {
@@ -53,6 +12,13 @@ export class EVM64 {
         this.initialGas = BigInt(gasLimit);
         this.depth = 1;
         this.traces = [];
+        
+        const { toU64 } = this._getUtils();
+        this.opcodes = createOpcodes(toU64);
+    }
+
+    _getUtils() {
+        return { toU64: (val) => BigInt.asUintN(64, val) };
     }
 
     getTrace(opCode, opName, cost, pc) {
@@ -76,7 +42,7 @@ export class EVM64 {
         
         while (this.running && this.pc < this.code.length) {
             const op = this.code[this.pc];
-            const opDef = OPCODES[op];
+            const opDef = this.opcodes[op];
             const currentPc = this.pc;
 
             if (!opDef) {

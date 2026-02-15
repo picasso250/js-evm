@@ -7,10 +7,12 @@
     <style>
         body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #eee; }
         h1 { color: #00d9ff; }
+        h2 { color: #ffd700; margin-top: 30px; }
         .input-group { margin: 20px 0; }
         label { display: block; margin-bottom: 5px; }
+        textarea { width: 400px; height: 120px; padding: 8px; font-family: monospace; background: #16213e; border: 1px solid #0f3460; color: #eee; }
         input[type="text"] { width: 400px; padding: 8px; font-family: monospace; background: #16213e; border: 1px solid #0f3460; color: #eee; }
-        button { padding: 8px 20px; background: #0f3460; color: #fff; border: none; cursor: pointer; font-family: monospace; }
+        button { padding: 8px 20px; background: #0f3460; color: #fff; border: none; cursor: pointer; font-family: monospace; margin-right: 10px; }
         button:hover { background: #00d9ff; color: #000; }
         table { border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 12px; }
         th, td { border: 1px solid #0f3460; padding: 6px 8px; text-align: left; }
@@ -18,22 +20,36 @@
         tr:nth-child(even) { background: #16213e; }
         .stack-val { color: #ffd700; }
         .result { margin-top: 20px; padding: 10px; background: #16213e; border: 1px solid #0f3460; }
+        .output-box { margin-top: 10px; padding: 10px; background: #16213e; border: 1px solid #0f3460; font-family: monospace; white-space: pre-wrap; }
     </style>
 </head>
 <body>
     <h1>EVM64 Web</h1>
+    
+    <h2>编译器</h2>
+    <div class="input-group">
+        <label>汇编代码:</label>
+        <textarea id="assembly" placeholder="PUSH1 0x02&#10;PUSH1 0x03&#10;STOP">PUSH1 0x02
+PUSH1 0x03
+STOP</textarea>
+    </div>
+    <button onclick="compile()">编译</button>
+    <button onclick="run()">编译并运行</button>
+    
+    <div class="output-box" id="compiledOutput" style="display:none;"></div>
     
     <div class="input-group">
         <label>字节码 (hex):</label>
         <input type="text" id="bytecode" value="6002600300" placeholder="例如: 6002600300">
     </div>
     
+    <h2>EVM</h2>
     <div class="input-group">
         <label>Gas 限制:</label>
         <input type="text" id="gasLimit" value="10000000000">
     </div>
     
-    <button onclick="runEVM()">运行</button>
+    <button onclick="runEVM()">运行字节码</button>
     
     <div class="result" id="result" style="display:none;">
         <strong>输出:</strong> <span id="output"></span> | 
@@ -57,7 +73,27 @@
     </table>
 
     <script type="module">
-        import { EVM64 } from './evm64-core.mjs';
+        import { EVM64 } from '../core/evm64-core.mjs';
+        import { Compiler } from '../core/compiler.mjs';
+
+        window.compile = function() {
+            const source = document.getElementById('assembly').value;
+            const compiler = new Compiler();
+            try {
+                const bytecode = compiler.compile(source);
+                document.getElementById('bytecode').value = bytecode;
+                document.getElementById('compiledOutput').style.display = 'block';
+                document.getElementById('compiledOutput').textContent = '编译结果: ' + bytecode;
+            } catch (e) {
+                document.getElementById('compiledOutput').style.display = 'block';
+                document.getElementById('compiledOutput').textContent = '错误: ' + e.message;
+            }
+        };
+
+        window.run = function() {
+            compile();
+            setTimeout(runEVM, 50);
+        };
 
         window.runEVM = function() {
             const bytecode = document.getElementById('bytecode').value.trim();

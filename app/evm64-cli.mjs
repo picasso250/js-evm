@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { EVM64 } from './evm64-core.mjs';
+import { EVM64 } from '../core/evm64-core.mjs';
 
 const args = process.argv.slice(2);
 
@@ -8,7 +8,7 @@ let traceMode = false;
 let code = "";
 
 if (args[0] !== 'run') {
-    console.log("Usage: node evm64.js run --trace <bytecode>");
+    console.log("Usage: node app/evm64-cli.mjs run --trace <bytecode>");
     process.exit(1);
 }
 
