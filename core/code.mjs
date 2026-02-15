@@ -1,3 +1,5 @@
+import { toHex } from '../common/utils.mjs';
+
 export class Code {
     constructor(hexBytecode) {
         this.bytes = hexBytecode; // 假设传入的已经是 Uint8Array
