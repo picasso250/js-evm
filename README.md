@@ -2,6 +2,8 @@
 
 A JavaScript implementation of a **64-bit** Ethereum Virtual Machine (EVM). This project deviates from the standard 256-bit EVM to focus on a 64-bit architecture, while maintaining the core logic and opcode structure of the EVM.
 
+![web-ui](web-ui.png)
+
 ## Features
 
 *   **64-bit Architecture**: Operates on 64-bit integers instead of 256-bit.
