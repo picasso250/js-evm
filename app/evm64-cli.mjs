@@ -30,10 +30,11 @@ const result = vm.run(traceMode);
 
 if (traceMode) {
     result.traces.forEach(t => console.error(JSON.stringify(t)));
+    console.error(JSON.stringify({
+        output: result.output.length > 0 ? Array.from(result.output).map(b => b.toString(16).padStart(2, '0')).join('') : '',
+        gasUsed: result.gasUsed,
+        error: result.reverted ? 'execution reverted' : undefined
+    }));
+} else {
+    console.log(result.output.length > 0 ? '0x' +Array.from(result.output).map(b => b.toString(16).padStart(2, '0')).join('') : '');
 }
-
-console.error(JSON.stringify({
-    output: result.output.length > 0 ? Array.from(result.output).map(b => b.toString(16).padStart(2, '0')).join('') : '',
-    gasUsed: result.gasUsed,
-    error: result.reverted ? 'execution reverted' : undefined
-}));
