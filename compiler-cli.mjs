@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { Compiler } from '../core/compiler.mjs';
+import { Compiler } from './core/compiler.mjs';
 import { readFileSync } from 'fs';
 
 const args = process.argv.slice(2);
