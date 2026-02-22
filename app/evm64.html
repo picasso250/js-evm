@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM64 Web</title>
+    <title>EVM64-JS</title>
     <style>
         body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #eee; }
         h1 { color: #00d9ff; }
@@ -38,11 +38,86 @@
             border-radius: 3px; z-index: 10;
         }
         .byte-box:hover .tooltip { display: block; }
+        .scroll-table { max-height:300px;overflow-y:auto;border:1px solid #0f3460;margin-bottom:20px; }
+        .scroll-table table { margin-top:0; }
+        .scroll-table thead { position:sticky;top:0; }
     </style>
 </head>
 <body>
-    <h1>EVM64 Web</h1>
+    <h1>EVM64-JS <span style="font-size:14px;color:#888;">(虚拟机)</span></h1>
     
+    <div style="background:#16213e;padding:15px;border-radius:8px;margin-bottom:20px;">
+        <h3 style="margin:0 0 10px 0;color:#00d9ff;">这是什么？</h3>
+        <p style="margin:5px 0;font-size:13px;">
+            你可以把它理解为一个<strong>只跑一个程序的计算机</strong>。
+        </p>
+        <div style="display:flex;gap:20px;margin-top:15px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;">
+                <div style="color:#ffd700;font-weight:bold;">堆栈 Stack</div>
+                <div style="font-size:12px;color:#aaa;">后进先出(LIFO)</div>
+            </div>
+            <div style="flex:1;min-width:200px;">
+                <div style="color:#ffd700;font-weight:bold;">Gas 燃料</div>
+                <div style="font-size:12px;color:#aaa;">执行要"花钱"，防止无限循环</div>
+            </div>
+            <div style="flex:1;min-width:200px;">
+                <div style="color:#ffd700;font-weight:bold;">字节码 Bytecode</div>
+                <div style="font-size:12px;color:#aaa;">机器能看懂的指令(hex格式)</div>
+            </div>
+        </div>
+    </div>
+
+    <h2>快速示例</h2>
+    <div style="margin-bottom:15px;">
+        <button onclick="loadExample('add')" style="background:#0f3460;">➕ 加法 (01)</button>
+        <button onclick="loadExample('mul')" style="background:#0f3460;">✖️ 乘法 (02)</button>
+        <button onclick="loadExample('push')" style="background:#0f3460;">📥 压栈 (60)</button>
+        <button onclick="loadExample('pop')" style="background:#0f3460;">📤 出栈 (50)</button>
+        <button onclick="loadExample('store')" style="background:#0f3460;">💾 存值 (52)</button>
+    </div>
+
+    <h2>指令参考</h2>
+    <div class="scroll-table">
+        <table style="font-size:11px; margin-top:0;">
+            <thead style="position:sticky;top:0;">
+                <tr style="background:#16213e;">
+                    <th>编码</th><th>指令</th><th>Gas</th><th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>00</td><td>STOP</td><td>0</td><td>停止执行</td></tr>
+                <tr><td>01</td><td>ADD</td><td>3</td><td>弹出两个数相加</td></tr>
+                <tr><td>02</td><td>MUL</td><td>5</td><td>弹出两个数相乘</td></tr>
+                <tr><td>03</td><td>SUB</td><td>3</td><td>a - b</td></tr>
+                <tr><td>04</td><td>DIV</td><td>5</td><td>a / b (无符号)</td></tr>
+                <tr><td>05</td><td>SDIV</td><td>5</td><td>a / b (有符号)</td></tr>
+                <tr><td>06</td><td>MOD</td><td>5</td><td>a % b (无符号)</td></tr>
+                <tr><td>07</td><td>SMOD</td><td>5</td><td>a % b (有符号)</td></tr>
+                <tr><td>0A</td><td>EXP</td><td>10+</td><td>a 的 b 次方</td></tr>
+                <tr><td>10</td><td>LT</td><td>3</td><td>a &lt; b ? 1:0 (无符号)</td></tr>
+                <tr><td>11</td><td>GT</td><td>3</td><td>a &gt; b ? 1:0 (无符号)</td></tr>
+                <tr><td>14</td><td>EQ</td><td>3</td><td>a == b ? 1:0</td></tr>
+                <tr><td>15</td><td>ISZERO</td><td>3</td><td>a == 0 ? 1:0</td></tr>
+                <tr><td>16</td><td>AND</td><td>3</td><td>a & b</td></tr>
+                <tr><td>17</td><td>OR</td><td>3</td><td>a | b</td></tr>
+                <tr><td>18</td><td>XOR</td><td>3</td><td>a ^ b</td></tr>
+                <tr><td>19</td><td>NOT</td><td>3</td><td>~a (按位取反)</td></tr>
+                <tr><td>50</td><td>POP</td><td>2</td><td>弹出栈顶(丢弃)</td></tr>
+                <tr><td>51</td><td>MLOAD</td><td>3+</td><td>从内存读取8字节</td></tr>
+                <tr><td>52</td><td>MSTORE</td><td>3+</td><td>写8字节到内存</td></tr>
+                <tr><td>56</td><td>JUMP</td><td>8</td><td>跳转到目标地址</td></tr>
+                <tr><td>57</td><td>JUMPI</td><td>10</td><td>条件跳转</td></tr>
+                <tr><td>5B</td><td>JUMPDEST</td><td>1</td><td>跳转目的地标记</td></tr>
+                <tr><td>5F</td><td>PUSH0</td><td>2</td><td>压入0 (EIP-3855)</td></tr>
+                <tr><td>60-67</td><td>PUSH1-8</td><td>3</td><td>压入1-8字节数据</td></tr>
+                <tr><td>80-8F</td><td>DUP1-16</td><td>3</td><td>复制栈顶第N项</td></tr>
+                <tr><td>90-9F</td><td>SWAP1-16</td><td>3</td><td>交换栈顶与第N项</td></tr>
+                <tr><td>F3</td><td>RETURN</td><td>0</td><td>返回数据并停止</td></tr>
+                <tr><td>FD</td><td>REVERT</td><td>0</td><td>回滚并返回数据</td></tr>
+            </tbody>
+        </table>
+    </div>
+
     <h2>编译器</h2>
     <div class="input-group">
         <label>汇编代码:</label>
@@ -118,6 +193,22 @@ STOP</textarea>
         };
 
         renderBytecode();
+
+        window.loadExample = function(type) {
+            const examples = {
+                add: { asm: "PUSH1 0x05\nPUSH1 0x03\nADD\nSTOP", desc: "3 + 5 = 8" },
+                mul: { asm: "PUSH1 0x03\nPUSH1 0x04\nMUL\nSTOP", desc: "3 * 4 = 12" },
+                push: { asm: "PUSH1 0x42\nSTOP", desc: "压入 0x42 = 66" },
+                pop: { asm: "PUSH1 0x99\nPOP\nSTOP", desc: "压入后弹出(丢弃)" },
+                store: { asm: "PUSH1 0xAA\nPUSH1 0x00\nMSTORE\nPUSH1 0x00\nMLOAD\nSTOP", desc: "存到内存再读取" }
+            };
+            const ex = examples[type];
+            if (ex) {
+                document.getElementById('assembly').value = ex.asm;
+                compile();
+                alert(ex.desc);
+            }
+        };
 
         window.compile = function() {
             const source = document.getElementById('assembly').value;
