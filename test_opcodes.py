@@ -6,7 +6,7 @@ import os
 # --- 配置 ---
 
 # 你的 Node.js EVM 路径 (根据你的实际路径调整)
-MY_EVM_CMD = ["node", "./app/evm64-cli.mjs", "run", "--trace"]
+MY_EVM_CMD = ["node", "./evm64-cli.mjs", "run", "--trace"]
 
 # 官方 Geth EVM 命令 (确保 'evm' 在系统 PATH 中)
 OFFICIAL_EVM_CMD = ["evm", "run", "--trace"]
