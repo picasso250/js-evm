@@ -216,6 +216,7 @@
         <button onclick="loadExample('push')" style="background:#0f3460;">📥 压栈 (60)</button>
         <button onclick="loadExample('pop')" style="background:#0f3460;">📤 出栈 (50)</button>
         <button onclick="loadExample('store')" style="background:#0f3460;">💾 存值 (52)</button>
+        <button onclick="loadExample('factorial')" style="background:#0f3460;">🔢 阶乘 (循环)</button>
         <button onclick="showOpcodes()" style="background:#0f3460;">📖 指令参考</button>
     </div>
 
@@ -377,7 +378,8 @@ STOP</textarea>
                 mul: { asm: "PUSH1 0x03\nPUSH1 0x04\nMUL\nSTOP", desc: "3 * 4 = 12" },
                 push: { asm: "PUSH1 0x42\nSTOP", desc: "压入 0x42 = 66" },
                 pop: { asm: "PUSH1 0x99\nPOP\nSTOP", desc: "压入后弹出(丢弃)" },
-                store: { asm: "PUSH1 0xAA\nPUSH1 0x00\nMSTORE\nPUSH1 0x00\nMLOAD\nSTOP", desc: "存到内存再读取" }
+                store: { asm: "PUSH1 0xAA\nPUSH1 0x00\nMSTORE\nPUSH1 0x00\nMLOAD\nSTOP", desc: "存到内存再读取" },
+                factorial: { asm: "; --- 配置层 ---\n.DEF i 0\n.DEF r 8\n\n; --- 初始化 ---\nMSTORE($i, 1)\nMSTORE($r, 1)\n\nloop_start:\nJUMPDEST\n; if i > 5 break\nJUMPI(@loop_end, GT(MLoad($i), 5))\n\n; r = r * i\nMSTORE($r, MUL(MLoad($r), MLoad($i)))\n\n; i = i + 1\nMSTORE($i, ADD(MLoad($i), 1))\n\nJUMP(@loop_start)\n\nloop_end:\nJUMPDEST\n; 返回内存地址 8 (即 r) 处的 8 字节数据\nRETURN($r, 8)", desc: "计算 5! = 120" }
             };
             const ex = examples[type];
             if (ex) {
