@@ -96,8 +96,28 @@ export class Compiler {
     // ==========================================
 
     compile(source) {
+        // --- Pass -1: 常量定义与变量替换 ---
+        const constants = {};
+        const processedLines = source.split('\n').map(line => {
+            // 处理 .DEF i 0
+            if (line.startsWith('.DEF')) {
+                const [_, name, value] = line.split(/\s+/);
+                constants[name] = value;
+                return null; // 定义行不产生代码
+            }
+            return line;
+        }).filter(l => l !== null);
+
+        // 进行全文变量替换 $i -> 0
+        let expandedSource = processedLines.join('\n');
+        for (const [name, value] of Object.entries(constants)) {
+            // 匹配 $name 但后面不能是字母数字，防止局部替换
+            const reg = new RegExp('\\$' + name + '\\b', 'g');
+            expandedSource = expandedSource.replace(reg, value);
+        }
+
         // 1. 预处理：去注释、去空行
-        const rawLines = source.split('\n')
+        const rawLines = expandedSource.split('\n')
             .map(line => line.split(';')[0].trim()) // 支持 ; 号注释
             .map(line => line.split('//')[0].trim()) // 支持 // 注释
             .filter(line => line.length > 0);
