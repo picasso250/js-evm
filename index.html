@@ -422,7 +422,9 @@ STOP</textarea>
 
             document.getElementById('result').style.display = 'block';
             const outputStr = result.output.length > 0 ? Array.from(result.output).map(b => b.toString(16).padStart(2, '0')).join('') : '';
-            document.getElementById('output').textContent = outputStr;
+            const outputEl = document.getElementById('output');
+            outputEl.textContent = outputStr;
+            outputEl.title = result.output.length > 0 ? Array.from(result.output).join(', ') : '';
             document.getElementById('gasUsed').textContent = result.gasUsed;
             document.getElementById('error').textContent = result.reverted ? 'execution reverted' : '';
 
