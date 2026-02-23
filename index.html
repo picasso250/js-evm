@@ -1,51 +1,197 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EVM64-JS</title>
     <style>
-        body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #eee; }
-        h1 { color: #00d9ff; }
-        h2 { color: #ffd700; margin-top: 30px; }
-        .input-group { margin: 20px 0; }
-        label { display: block; margin-bottom: 5px; }
-        textarea { width: 400px; height: 120px; padding: 8px; font-family: monospace; background: #16213e; border: 1px solid #0f3460; color: #eee; }
-        input[type="text"] { width: 400px; padding: 8px; font-family: monospace; background: #16213e; border: 1px solid #0f3460; color: #eee; }
-        button { padding: 8px 20px; background: #0f3460; color: #fff; border: none; cursor: pointer; font-family: monospace; margin-right: 10px; }
-        button:hover { background: #00d9ff; color: #000; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 12px; }
-        th, td { border: 1px solid #0f3460; padding: 6px 8px; text-align: left; }
-        th { background: #16213e; color: #00d9ff; }
-        tr:nth-child(even) { background: #16213e; }
-        .stack-val { color: #ffd700; }
-        .result { margin-top: 20px; padding: 10px; background: #16213e; border: 1px solid #0f3460; }
-        .output-box { margin-top: 10px; padding: 10px; background: #16213e; border: 1px solid #0f3460; font-family: monospace; white-space: pre-wrap; }
-        .bytecode-display { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
-        .byte-box { 
-            width: 28px; height: 28px; 
-            display: flex; align-items: center; justify-content: center;
-            background: #16213e; border: 1px solid #0f3460;
-            font-family: monospace; font-size: 12px; color: #eee;
-            cursor: default; position: relative;
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
         }
-        .byte-box:hover { background: #0f3460; border-color: #00d9ff; }
-        .byte-box.highlight { background: #00d9ff; color: #000; border-color: #00d9ff; }
+
+        h1 {
+            color: #00d9ff;
+        }
+
+        h2 {
+            color: #ffd700;
+            margin-top: 30px;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        textarea {
+            width: 400px;
+            height: 120px;
+            padding: 8px;
+            font-family: monospace;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            color: #eee;
+        }
+
+        input[type="text"] {
+            width: 400px;
+            padding: 8px;
+            font-family: monospace;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            color: #eee;
+        }
+
+        button {
+            padding: 8px 20px;
+            background: #0f3460;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-family: monospace;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background: #00d9ff;
+            color: #000;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        th,
+        td {
+            border: 1px solid #0f3460;
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #16213e;
+            color: #00d9ff;
+        }
+
+        tr:nth-child(even) {
+            background: #16213e;
+        }
+
+        .stack-val {
+            color: #ffd700;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #16213e;
+            border: 1px solid #0f3460;
+        }
+
+        .output-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .bytecode-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 10px;
+        }
+
+        .byte-box {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            font-family: monospace;
+            font-size: 12px;
+            color: #eee;
+            cursor: default;
+            position: relative;
+        }
+
+        .byte-box:hover {
+            background: #0f3460;
+            border-color: #00d9ff;
+        }
+
+        .byte-box.highlight {
+            background: #00d9ff;
+            color: #000;
+            border-color: #00d9ff;
+        }
+
         .byte-box .tooltip {
-            display: none; position: absolute; bottom: 100%; left: 50%;
-            transform: translateX(-50%); background: #000; color: #fff;
-            padding: 4px 8px; font-size: 11px; white-space: nowrap;
-            border-radius: 3px; z-index: 10;
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 11px;
+            white-space: nowrap;
+            border-radius: 3px;
+            z-index: 10;
         }
-        .byte-box:hover .tooltip { display: block; }
-        .scroll-table { max-height:300px;overflow-y:auto;border:1px solid #0f3460;margin-bottom:20px; }
-        .scroll-table table { margin-top:0; }
-        .scroll-table thead { position:sticky;top:0; }
+
+        .byte-box:hover .tooltip {
+            display: block;
+        }
+
+        .scroll-table {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #0f3460;
+            margin-bottom: 20px;
+        }
+
+        .scroll-table table {
+            margin-top: 0;
+        }
+
+        .scroll-table thead {
+            position: sticky;
+            top: 0;
+        }
+
+        #ControlWrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        #ControlWrapper>div {
+            flex: 1;
+            min-width: 420px;
+        }
     </style>
 </head>
+
 <body>
     <h1>EVM64-JS <span style="font-size:14px;color:#888;">(虚拟机)</span></h1>
-    
+
     <div style="background:#16213e;padding:15px;border-radius:8px;margin-bottom:20px;">
         <div style="display:flex;gap:20px;flex-wrap:wrap;">
             <div style="flex:1;min-width:200px;">
@@ -73,87 +219,245 @@
         <button onclick="showOpcodes()" style="background:#0f3460;">📖 指令参考</button>
     </div>
 
-    <div id="opcodeModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:100;" onclick="if(event.target===this)this.style.display='none'">
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a2e;border:2px solid #0f3460;padding:20px;max-width:600px;max-height:80vh;overflow:auto;border-radius:8px;">
+    <div id="opcodeModal"
+        style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:100;"
+        onclick="if(event.target===this)this.style.display='none'">
+        <div
+            style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a2e;border:2px solid #0f3460;padding:20px;max-width:600px;max-height:80vh;overflow:auto;border-radius:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
                 <h3 style="margin:0;color:#00d9ff;">指令参考</h3>
-                <button onclick="document.getElementById('opcodeModal').style.display='none'" style="background:#0f3460;padding:5px 10px;">✕ 关闭</button>
+                <button onclick="document.getElementById('opcodeModal').style.display='none'"
+                    style="background:#0f3460;padding:5px 10px;">✕ 关闭</button>
             </div>
             <table style="font-size:11px;width:100%;">
                 <thead>
-                    <tr style="background:#16213e;"><th>编码</th><th>指令</th><th>Gas</th><th>说明</th></tr>
+                    <tr style="background:#16213e;">
+                        <th>编码</th>
+                        <th>指令</th>
+                        <th>Gas</th>
+                        <th>说明</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <tr><td>00</td><td>STOP</td><td>0</td><td>停止执行</td></tr>
-                <tr><td>01</td><td>ADD</td><td>3</td><td>弹出两个数相加</td></tr>
-                <tr><td>02</td><td>MUL</td><td>5</td><td>弹出两个数相乘</td></tr>
-                <tr><td>03</td><td>SUB</td><td>3</td><td>a - b</td></tr>
-                <tr><td>04</td><td>DIV</td><td>5</td><td>a / b (无符号)</td></tr>
-                <tr><td>05</td><td>SDIV</td><td>5</td><td>a / b (有符号)</td></tr>
-                <tr><td>06</td><td>MOD</td><td>5</td><td>a % b (无符号)</td></tr>
-                <tr><td>07</td><td>SMOD</td><td>5</td><td>a % b (有符号)</td></tr>
-                <tr><td>0A</td><td>EXP</td><td>10+</td><td>a 的 b 次方</td></tr>
-                <tr><td>10</td><td>LT</td><td>3</td><td>a &lt; b ? 1:0 (无符号)</td></tr>
-                <tr><td>11</td><td>GT</td><td>3</td><td>a &gt; b ? 1:0 (无符号)</td></tr>
-                <tr><td>14</td><td>EQ</td><td>3</td><td>a == b ? 1:0</td></tr>
-                <tr><td>15</td><td>ISZERO</td><td>3</td><td>a == 0 ? 1:0</td></tr>
-                <tr><td>16</td><td>AND</td><td>3</td><td>a & b</td></tr>
-                <tr><td>17</td><td>OR</td><td>3</td><td>a | b</td></tr>
-                <tr><td>18</td><td>XOR</td><td>3</td><td>a ^ b</td></tr>
-                <tr><td>19</td><td>NOT</td><td>3</td><td>~a (按位取反)</td></tr>
-                <tr><td>50</td><td>POP</td><td>2</td><td>弹出栈顶(丢弃)</td></tr>
-                <tr><td>51</td><td>MLOAD</td><td>3+</td><td>从内存读取8字节</td></tr>
-                <tr><td>52</td><td>MSTORE</td><td>3+</td><td>写8字节到内存</td></tr>
-                <tr><td>56</td><td>JUMP</td><td>8</td><td>跳转到目标地址</td></tr>
-                <tr><td>57</td><td>JUMPI</td><td>10</td><td>条件跳转</td></tr>
-                <tr><td>5B</td><td>JUMPDEST</td><td>1</td><td>跳转目的地标记</td></tr>
-                <tr><td>5F</td><td>PUSH0</td><td>2</td><td>压入0</td></tr>
-                <tr><td>60-67</td><td>PUSH1-8</td><td>3</td><td>压入1-8字节数据</td></tr>
-                <tr><td>80-8F</td><td>DUP1-16</td><td>3</td><td>复制栈顶第N项</td></tr>
-                <tr><td>90-9F</td><td>SWAP1-16</td><td>3</td><td>交换栈顶与第N项</td></tr>
-                <tr><td>F3</td><td>RETURN</td><td>0</td><td>返回数据并停止</td></tr>
-                <tr><td>FD</td><td>REVERT</td><td>0</td><td>回滚并返回数据</td></tr>
+                    <tr>
+                        <td>00</td>
+                        <td>STOP</td>
+                        <td>0</td>
+                        <td>停止执行</td>
+                    </tr>
+                    <tr>
+                        <td>01</td>
+                        <td>ADD</td>
+                        <td>3</td>
+                        <td>弹出两个数相加</td>
+                    </tr>
+                    <tr>
+                        <td>02</td>
+                        <td>MUL</td>
+                        <td>5</td>
+                        <td>弹出两个数相乘</td>
+                    </tr>
+                    <tr>
+                        <td>03</td>
+                        <td>SUB</td>
+                        <td>3</td>
+                        <td>a - b</td>
+                    </tr>
+                    <tr>
+                        <td>04</td>
+                        <td>DIV</td>
+                        <td>5</td>
+                        <td>a / b (无符号)</td>
+                    </tr>
+                    <tr>
+                        <td>05</td>
+                        <td>SDIV</td>
+                        <td>5</td>
+                        <td>a / b (有符号)</td>
+                    </tr>
+                    <tr>
+                        <td>06</td>
+                        <td>MOD</td>
+                        <td>5</td>
+                        <td>a % b (无符号)</td>
+                    </tr>
+                    <tr>
+                        <td>07</td>
+                        <td>SMOD</td>
+                        <td>5</td>
+                        <td>a % b (有符号)</td>
+                    </tr>
+                    <tr>
+                        <td>0A</td>
+                        <td>EXP</td>
+                        <td>10+</td>
+                        <td>a 的 b 次方</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>LT</td>
+                        <td>3</td>
+                        <td>a &lt; b ? 1:0 (无符号)</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>GT</td>
+                        <td>3</td>
+                        <td>a &gt; b ? 1:0 (无符号)</td>
+                    </tr>
+                    <tr>
+                        <td>14</td>
+                        <td>EQ</td>
+                        <td>3</td>
+                        <td>a == b ? 1:0</td>
+                    </tr>
+                    <tr>
+                        <td>15</td>
+                        <td>ISZERO</td>
+                        <td>3</td>
+                        <td>a == 0 ? 1:0</td>
+                    </tr>
+                    <tr>
+                        <td>16</td>
+                        <td>AND</td>
+                        <td>3</td>
+                        <td>a & b</td>
+                    </tr>
+                    <tr>
+                        <td>17</td>
+                        <td>OR</td>
+                        <td>3</td>
+                        <td>a | b</td>
+                    </tr>
+                    <tr>
+                        <td>18</td>
+                        <td>XOR</td>
+                        <td>3</td>
+                        <td>a ^ b</td>
+                    </tr>
+                    <tr>
+                        <td>19</td>
+                        <td>NOT</td>
+                        <td>3</td>
+                        <td>~a (按位取反)</td>
+                    </tr>
+                    <tr>
+                        <td>50</td>
+                        <td>POP</td>
+                        <td>2</td>
+                        <td>弹出栈顶(丢弃)</td>
+                    </tr>
+                    <tr>
+                        <td>51</td>
+                        <td>MLOAD</td>
+                        <td>3+</td>
+                        <td>从内存读取8字节</td>
+                    </tr>
+                    <tr>
+                        <td>52</td>
+                        <td>MSTORE</td>
+                        <td>3+</td>
+                        <td>写8字节到内存</td>
+                    </tr>
+                    <tr>
+                        <td>56</td>
+                        <td>JUMP</td>
+                        <td>8</td>
+                        <td>跳转到目标地址</td>
+                    </tr>
+                    <tr>
+                        <td>57</td>
+                        <td>JUMPI</td>
+                        <td>10</td>
+                        <td>条件跳转</td>
+                    </tr>
+                    <tr>
+                        <td>5B</td>
+                        <td>JUMPDEST</td>
+                        <td>1</td>
+                        <td>跳转目的地标记</td>
+                    </tr>
+                    <tr>
+                        <td>5F</td>
+                        <td>PUSH0</td>
+                        <td>2</td>
+                        <td>压入0</td>
+                    </tr>
+                    <tr>
+                        <td>60-67</td>
+                        <td>PUSH1-8</td>
+                        <td>3</td>
+                        <td>压入1-8字节数据</td>
+                    </tr>
+                    <tr>
+                        <td>80-8F</td>
+                        <td>DUP1-16</td>
+                        <td>3</td>
+                        <td>复制栈顶第N项</td>
+                    </tr>
+                    <tr>
+                        <td>90-9F</td>
+                        <td>SWAP1-16</td>
+                        <td>3</td>
+                        <td>交换栈顶与第N项</td>
+                    </tr>
+                    <tr>
+                        <td>F3</td>
+                        <td>RETURN</td>
+                        <td>0</td>
+                        <td>返回数据并停止</td>
+                    </tr>
+                    <tr>
+                        <td>FD</td>
+                        <td>REVERT</td>
+                        <td>0</td>
+                        <td>回滚并返回数据</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        window.showOpcodes = function() { document.getElementById('opcodeModal').style.display = 'block'; };
+        window.showOpcodes = function () { document.getElementById('opcodeModal').style.display = 'block'; };
     </script>
 
-    <h2>编译器</h2>
-    <div class="input-group">
-        <label>汇编代码:</label>
-        <textarea id="assembly" placeholder="PUSH1 0x02&#10;PUSH1 0x03&#10;STOP">PUSH1 0x02
+    <h2>EVM64</h2>
+    <div id="ControlWrapper">
+        <div>
+            <div class="input-group">
+                <label>汇编代码:</label>
+                <textarea id="assembly" placeholder="PUSH1 0x02&#10;PUSH1 0x03&#10;STOP">PUSH1 0x02
 PUSH1 0x03
 STOP</textarea>
-    </div>
-    <button onclick="compile()">编译</button>
-    <button onclick="run()">编译并运行</button>
-    
+            </div>
+            <button onclick="compile()">编译</button>
+            <button onclick="run()">编译并运行</button>
+        </div>
 
-    
-    <div class="input-group">
-        <label>字节码 (hex):</label>
-        <input type="text" id="bytecode" value="6002600300" placeholder="例如: 6002600300" oninput="renderBytecode()">
+        <div>
+            <div class="input-group">
+                <label>字节码 (hex):</label>
+                <input type="text" id="bytecode" value="6002600300" placeholder="例如: 6002600300"
+                    oninput="renderBytecode()">
+            </div>
+            <div class="bytecode-display" id="bytecodeDisplay"></div>
+
+            <div class="input-group">
+                <label>Gas 限制:</label>
+                <input type="text" id="gasLimit" value="10000000000">
+            </div>
+
+            <button onclick="runEVM()">运行字节码</button>
+
+            <div class="result" id="result" style="display:none;">
+                <strong>输出:</strong> <span id="output"></span> |
+                <strong>Gas Used:</strong> <span id="gasUsed"></span> |
+                <strong>Error:</strong> <span id="error" style="color:#ff6b6b;"></span>
+            </div>
+        </div>
     </div>
-    <div class="bytecode-display" id="bytecodeDisplay"></div>
-    
-    <h2>EVM</h2>
-    <div class="input-group">
-        <label>Gas 限制:</label>
-        <input type="text" id="gasLimit" value="10000000000">
-    </div>
-    
-    <button onclick="runEVM()">运行字节码</button>
-    
-    <div class="result" id="result" style="display:none;">
-        <strong>输出:</strong> <span id="output"></span> | 
-        <strong>Gas Used:</strong> <span id="gasUsed"></span> |
-        <strong>Error:</strong> <span id="error" style="color:#ff6b6b;"></span>
-    </div>
-    
+
     <table id="traceTable">
         <thead>
             <tr>
@@ -179,7 +483,7 @@ STOP</textarea>
         const opcodeNames = {};
         Object.entries(opcodes).forEach(([k, v]) => { opcodeNames[Number(k)] = v.name; });
 
-        window.renderBytecode = function() {
+        window.renderBytecode = function () {
             const bytecode = document.getElementById('bytecode').value.trim();
             const container = document.getElementById('bytecodeDisplay');
             container.innerHTML = '';
@@ -198,7 +502,7 @@ STOP</textarea>
 
         renderBytecode();
 
-        window.loadExample = function(type) {
+        window.loadExample = function (type) {
             const examples = {
                 add: { asm: "PUSH1 0x05\nPUSH1 0x03\nADD\nSTOP", desc: "3 + 5 = 8" },
                 mul: { asm: "PUSH1 0x03\nPUSH1 0x04\nMUL\nSTOP", desc: "3 * 4 = 12" },
@@ -213,7 +517,7 @@ STOP</textarea>
             }
         };
 
-        window.compile = function() {
+        window.compile = function () {
             const source = document.getElementById('assembly').value;
             const compiler = new Compiler();
             try {
@@ -227,15 +531,15 @@ STOP</textarea>
             }
         };
 
-        window.run = function() {
+        window.run = function () {
             compile();
             setTimeout(runEVM, 50);
         };
 
-        window.runEVM = function() {
+        window.runEVM = function () {
             const bytecode = document.getElementById('bytecode').value.trim();
             const gasLimit = document.getElementById('gasLimit').value.trim() || "10000000000";
-            
+
             if (!bytecode) {
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('error').textContent = '请输入字节码';
@@ -282,4 +586,5 @@ STOP</textarea>
         };
     </script>
 </body>
+
 </html>
