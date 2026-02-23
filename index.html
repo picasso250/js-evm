@@ -235,184 +235,53 @@
                         <th>编码</th>
                         <th>指令</th>
                         <th>Gas</th>
+                        <th>堆栈</th>
                         <th>说明</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>00</td>
-                        <td>STOP</td>
-                        <td>0</td>
-                        <td>停止执行</td>
-                    </tr>
-                    <tr>
-                        <td>01</td>
-                        <td>ADD</td>
-                        <td>3</td>
-                        <td>弹出两个数相加</td>
-                    </tr>
-                    <tr>
-                        <td>02</td>
-                        <td>MUL</td>
-                        <td>5</td>
-                        <td>弹出两个数相乘</td>
-                    </tr>
-                    <tr>
-                        <td>03</td>
-                        <td>SUB</td>
-                        <td>3</td>
-                        <td>a - b</td>
-                    </tr>
-                    <tr>
-                        <td>04</td>
-                        <td>DIV</td>
-                        <td>5</td>
-                        <td>a / b (无符号)</td>
-                    </tr>
-                    <tr>
-                        <td>05</td>
-                        <td>SDIV</td>
-                        <td>5</td>
-                        <td>a / b (有符号)</td>
-                    </tr>
-                    <tr>
-                        <td>06</td>
-                        <td>MOD</td>
-                        <td>5</td>
-                        <td>a % b (无符号)</td>
-                    </tr>
-                    <tr>
-                        <td>07</td>
-                        <td>SMOD</td>
-                        <td>5</td>
-                        <td>a % b (有符号)</td>
-                    </tr>
-                    <tr>
-                        <td>0A</td>
-                        <td>EXP</td>
-                        <td>10+</td>
-                        <td>a 的 b 次方</td>
-                    </tr>
-                    <tr>
-                        <td>10</td>
-                        <td>LT</td>
-                        <td>3</td>
-                        <td>a &lt; b ? 1:0 (无符号)</td>
-                    </tr>
-                    <tr>
-                        <td>11</td>
-                        <td>GT</td>
-                        <td>3</td>
-                        <td>a &gt; b ? 1:0 (无符号)</td>
-                    </tr>
-                    <tr>
-                        <td>14</td>
-                        <td>EQ</td>
-                        <td>3</td>
-                        <td>a == b ? 1:0</td>
-                    </tr>
-                    <tr>
-                        <td>15</td>
-                        <td>ISZERO</td>
-                        <td>3</td>
-                        <td>a == 0 ? 1:0</td>
-                    </tr>
-                    <tr>
-                        <td>16</td>
-                        <td>AND</td>
-                        <td>3</td>
-                        <td>a & b</td>
-                    </tr>
-                    <tr>
-                        <td>17</td>
-                        <td>OR</td>
-                        <td>3</td>
-                        <td>a | b</td>
-                    </tr>
-                    <tr>
-                        <td>18</td>
-                        <td>XOR</td>
-                        <td>3</td>
-                        <td>a ^ b</td>
-                    </tr>
-                    <tr>
-                        <td>19</td>
-                        <td>NOT</td>
-                        <td>3</td>
-                        <td>~a (按位取反)</td>
-                    </tr>
-                    <tr>
-                        <td>50</td>
-                        <td>POP</td>
-                        <td>2</td>
-                        <td>弹出栈顶(丢弃)</td>
-                    </tr>
-                    <tr>
-                        <td>51</td>
-                        <td>MLOAD</td>
-                        <td>3+</td>
-                        <td>从内存读取8字节</td>
-                    </tr>
-                    <tr>
-                        <td>52</td>
-                        <td>MSTORE</td>
-                        <td>3+</td>
-                        <td>写8字节到内存</td>
-                    </tr>
-                    <tr>
-                        <td>56</td>
-                        <td>JUMP</td>
-                        <td>8</td>
-                        <td>跳转到目标地址</td>
-                    </tr>
-                    <tr>
-                        <td>57</td>
-                        <td>JUMPI</td>
-                        <td>10</td>
-                        <td>条件跳转</td>
-                    </tr>
-                    <tr>
-                        <td>5B</td>
-                        <td>JUMPDEST</td>
-                        <td>1</td>
-                        <td>跳转目的地标记</td>
-                    </tr>
-                    <tr>
-                        <td>5F</td>
-                        <td>PUSH0</td>
-                        <td>2</td>
-                        <td>压入0</td>
-                    </tr>
-                    <tr>
-                        <td>60-67</td>
-                        <td>PUSH1-8</td>
-                        <td>3</td>
-                        <td>压入1-8字节数据</td>
-                    </tr>
-                    <tr>
-                        <td>80-8F</td>
-                        <td>DUP1-16</td>
-                        <td>3</td>
-                        <td>复制栈顶第N项</td>
-                    </tr>
-                    <tr>
-                        <td>90-9F</td>
-                        <td>SWAP1-16</td>
-                        <td>3</td>
-                        <td>交换栈顶与第N项</td>
-                    </tr>
-                    <tr>
-                        <td>F3</td>
-                        <td>RETURN</td>
-                        <td>0</td>
-                        <td>返回数据并停止</td>
-                    </tr>
-                    <tr>
-                        <td>FD</td>
-                        <td>REVERT</td>
-                        <td>0</td>
-                        <td>回滚并返回数据</td>
-                    </tr>
+                    <tr><td>00</td><td>STOP</td><td>0</td><td>-</td><td>停止执行</td></tr>
+                    <tr><td>01</td><td>ADD</td><td>3</td><td>a + b</td><td>弹出两个数相加</td></tr>
+                    <tr><td>02</td><td>MUL</td><td>5</td><td>a * b</td><td>弹出两个数相乘</td></tr>
+                    <tr><td>03</td><td>SUB</td><td>3</td><td>a - b</td><td>弹出两个数相减</td></tr>
+                    <tr><td>04</td><td>DIV</td><td>5</td><td>a / b</td><td>a / b (无符号)</td></tr>
+                    <tr><td>05</td><td>SDIV</td><td>5</td><td>a / b</td><td>a / b (有符号)</td></tr>
+                    <tr><td>06</td><td>MOD</td><td>5</td><td>a % b</td><td>a % b (无符号)</td></tr>
+                    <tr><td>07</td><td>SMOD</td><td>5</td><td>a % b</td><td>a % b (有符号)</td></tr>
+                    <tr><td>08</td><td>ADDMOD</td><td>8</td><td>(a + b) % n</td><td>先加后模</td></tr>
+                    <tr><td>09</td><td>MULMOD</td><td>8</td><td>(a * b) % n</td><td>先乘后模</td></tr>
+                    <tr><td>0A</td><td>EXP</td><td>10+</td><td>a ** b</td><td>a 的 b 次方</td></tr>
+                    <tr><td>0B</td><td>SIGNEXTEND</td><td>5</td><td>signext(k, x)</td><td>符号扩展</td></tr>
+                    <tr><td>10</td><td>LT</td><td>3</td><td>a &lt; b</td><td>a &lt; b ? 1:0 (无符号)</td></tr>
+                    <tr><td>11</td><td>GT</td><td>3</td><td>a &gt; b</td><td>a &gt; b ? 1:0 (无符号)</td></tr>
+                    <tr><td>12</td><td>SLT</td><td>3</td><td>a &lt; b</td><td>a &lt; b ? 1:0 (有符号)</td></tr>
+                    <tr><td>13</td><td>SGT</td><td>3</td><td>a &gt; b</td><td>a &gt; b ? 1:0 (有符号)</td></tr>
+                    <tr><td>14</td><td>EQ</td><td>3</td><td>a == b</td><td>a == b ? 1:0</td></tr>
+                    <tr><td>15</td><td>ISZERO</td><td>3</td><td>a == 0</td><td>a == 0 ? 1:0</td></tr>
+                    <tr><td>16</td><td>AND</td><td>3</td><td>a &amp; b</td><td>按位与</td></tr>
+                    <tr><td>17</td><td>OR</td><td>3</td><td>a | b</td><td>按位或</td></tr>
+                    <tr><td>18</td><td>XOR</td><td>3</td><td>a ^ b</td><td>按位异或</td></tr>
+                    <tr><td>19</td><td>NOT</td><td>3</td><td>~a</td><td>按位取反</td></tr>
+                    <tr><td>1A</td><td>BYTE</td><td>3</td><td>byte(n, x)</td><td>取第n字节</td></tr>
+                    <tr><td>1B</td><td>SHL</td><td>3</td><td>a &lt;&lt; b</td><td>左移</td></tr>
+                    <tr><td>1C</td><td>SHR</td><td>3</td><td>a &gt;&gt; b</td><td>逻辑右移</td></tr>
+                    <tr><td>1D</td><td>SAR</td><td>3</td><td>a &gt;&gt; b</td><td>算术右移</td></tr>
+                    <tr><td>50</td><td>POP</td><td>2</td><td>-</td><td>弹出栈顶(丢弃)</td></tr>
+                    <tr><td>51</td><td>MLOAD</td><td>3+</td><td>m[offset]</td><td>从内存读取8字节</td></tr>
+                    <tr><td>52</td><td>MSTORE</td><td>3+</td><td>m[offset] = val</td><td>写8字节到内存</td></tr>
+                    <tr><td>53</td><td>MSTORE8</td><td>3+</td><td>m[offset] = val&amp;0xff</td><td>写1字节到内存</td></tr>
+                    <tr><td>56</td><td>JUMP</td><td>8</td><td>pc = dest</td><td>跳转到目标地址</td></tr>
+                    <tr><td>57</td><td>JUMPI</td><td>10</td><td>if(cond) pc = dest</td><td>条件跳转</td></tr>
+                    <tr><td>58</td><td>PC</td><td>2</td><td>pc</td><td>获取程序计数器</td></tr>
+                    <tr><td>59</td><td>MSIZE</td><td>2</td><td>size</td><td>内存大小</td></tr>
+                    <tr><td>5B</td><td>JUMPDEST</td><td>1</td><td>-</td><td>跳转目的地标记</td></tr>
+                    <tr><td>5E</td><td>MCOPY</td><td>3+</td><td>m[dst] = m[src]</td><td>内存拷贝</td></tr>
+                    <tr><td>5F</td><td>PUSH0</td><td>2</td><td>0</td><td>压入0</td></tr>
+                    <tr><td>60-67</td><td>PUSH1-8</td><td>3</td><td>imm</td><td>压入1-8字节数据</td></tr>
+                    <tr><td>80-8F</td><td>DUP1-16</td><td>3</td><td>stack[n]</td><td>复制栈顶第N项</td></tr>
+                    <tr><td>90-9F</td><td>SWAP1-16</td><td>3</td><td>swap</td><td>交换栈顶与第N项</td></tr>
+                    <tr><td>F3</td><td>RETURN</td><td>0</td><td>output</td><td>返回数据并停止</td></tr>
+                    <tr><td>FD</td><td>REVERT</td><td>0</td><td>output</td><td>回滚并返回数据</td></tr>
                 </tbody>
             </table>
         </div>
