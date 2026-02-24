@@ -373,7 +373,7 @@ STOP</textarea>
             const examples = {
                 add: { asm: "PUSH1 0x05\nPUSH1 0x03\nADD\nSTOP", desc: "3 + 5 = 8" },
                 store: { asm: "PUSH1 0xAA\nPUSH1 0x00\nMSTORE\nPUSH1 0x00\nMLOAD\nSTOP", desc: "存到内存再读取" },
-                factorial: { asm: "; --- 配置层 ---\n.DEF i 0\n.DEF r 8\n\n; --- 初始化 ---\nMSTORE($i, 1)\nMSTORE($r, 1)\n\nloop_start:\nJUMPDEST\n; if i > 5 break\nJUMPI(@loop_end, GT(MLoad($i), 5))\n\n; r = r * i\nMSTORE($r, MUL(MLoad($r), MLoad($i)))\n\n; i = i + 1\nMSTORE($i, ADD(MLoad($i), 1))\n\nJUMP(@loop_start)\n\nloop_end:\nJUMPDEST\n; 返回内存地址 8 (即 r) 处的 8 字节数据\nRETURN($r, 8)", desc: "计算 5! = 120" }
+                factorial: { asm: "; --- 配置层 ---\n.DEF i 0\n.DEF r 8\n\n; --- 初始化 ---\nMSTORE($i, 1)\nMSTORE($r, 1)\n\nloop_start:\nJUMPDEST\n; if i > 5 break\nJUMPI(@loop_end, GT(MLOAD($i), 5))\n\n; r = r * i\nMSTORE($r, MUL(MLOAD($r), MLOAD($i)))\n\n; i = i + 1\nMSTORE($i, ADD(MLOAD($i), 1))\n\nJUMP(@loop_start)\n\nloop_end:\nJUMPDEST\n; 返回内存地址 8 (即 r) 处的 8 字节数据\nRETURN($r, 8)", desc: "计算 5! = 120" }
             };
             const ex = examples[type];
             if (ex) {
